@@ -35,7 +35,11 @@ export function PlanCard({ plan, selected, onSelect }) {
         <span>
           <span className="block font-semibold">{plan.name}</span>
           <span className="mt-1 block text-xs text-muted-foreground">
-            {plan.durationDays} days of Premium access
+            {plan.recurringEnabled
+              ? plan.trialAmount && plan.trialEligible !== false
+                ? `₹${plan.trialAmount / 100} for ${plan.trialDays} day${plan.trialDays === 1 ? '' : 's'}, then renews automatically`
+                : `Renews every ${plan.billingInterval} ${plan.billingPeriod}`
+              : `${plan.durationDays} days of Premium access`}
           </span>
         </span>
         <span className="flex items-center gap-3">

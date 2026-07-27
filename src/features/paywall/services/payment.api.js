@@ -37,3 +37,16 @@ export async function verifyPayment(fields) {
   const response = await apiClient.post('/payments/verify', fields);
   return unwrap(response);
 }
+
+export async function createRecurringSubscription(planId) {
+  const response = await apiClient.post('/payments/subscription', {
+    planId,
+    idempotencyKey: getCheckoutIdempotencyKey(planId),
+  });
+  return unwrap(response);
+}
+
+export async function verifyRecurringSubscription(fields) {
+  const response = await apiClient.post('/payments/subscription/verify', fields);
+  return unwrap(response);
+}

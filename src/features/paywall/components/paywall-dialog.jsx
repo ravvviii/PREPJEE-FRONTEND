@@ -19,8 +19,10 @@ import { ANALYTICS_EVENTS } from '@/services/analytics/events';
 import {
   clearCheckoutIdempotencyKey,
   createPaymentOrder,
+  createRecurringSubscription,
   getSubscriptionPlans,
   verifyPayment,
+  verifyRecurringSubscription,
 } from '../services/payment.api';
 import { loadRazorpay } from '../lib/razorpay';
 import { PlanCard } from './plan-card';
@@ -72,8 +74,10 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
     track(ANALYTICS_EVENTS.PAYMENT_STARTED, properties);
 
     try {
-      const [order, scriptLoaded] = await Promise.all([
-        createPaymentOrder(selectedPlan.id),
+      const [checkoutData, scriptLoaded] = await Promise.all([
+        selectedPlan.recurringEnabled
+          ? createRecurringSubscription(selectedPlan.id)
+          : createPaymentOrder(selectedPlan.id),
         loadRazorpay(),
       ]);
 
@@ -82,10 +86,14 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
       }
 
       const checkout = new window.Razorpay({
-        key: order.keyId,
-        amount: order.amount,
-        currency: order.currency,
-        order_id: order.orderId,
+        key: checkoutData.keyId,
+        ...(selectedPlan.recurringEnabled
+          ? { subscription_id: checkoutData.subscriptionId }
+          : {
+              amount: checkoutData.amount,
+              currency: checkoutData.currency,
+              order_id: checkoutData.orderId,
+            }),
         name: 'PrepJEE',
         description: `${selectedPlan.name} subscription`,
         prefill: {
@@ -104,17 +112,29 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
           setPaymentState('verifying');
           track(ANALYTICS_EVENTS.PAYMENT_VERIFICATION_STARTED, properties);
           try {
-            await verifyPayment({
-              razorpayOrderId: response.razorpay_order_id,
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpaySignature: response.razorpay_signature,
-            });
+            if (selectedPlan.recurringEnabled) {
+              await verifyRecurringSubscription({
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySubscriptionId: response.razorpay_subscription_id,
+                razorpaySignature: response.razorpay_signature,
+              });
+            } else {
+              await verifyPayment({
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              });
+            }
             await refreshUser();
             clearCheckoutIdempotencyKey(selectedPlan.id);
             setPaymentState('success');
             track(ANALYTICS_EVENTS.PAYMENT_SUCCEEDED, properties);
             track(ANALYTICS_EVENTS.SUBSCRIPTION_ACTIVATED, properties);
-            toast.success('PrepJEE Premium is now active.');
+            toast.success(
+              selectedPlan.recurringEnabled && selectedPlan.trialDays
+                ? `Your ${selectedPlan.trialDays}-day Premium trial is active.`
+                : 'PrepJEE Premium is now active.',
+            );
             onPaymentSuccess();
           } catch (error) {
             setPaymentState('failed');
@@ -215,6 +235,23 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
               </div>
             )}
           </div>
+
+          {selectedPlan?.recurringEnabled && (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
+              <p className="font-semibold">
+                ₹{(selectedPlan.trialEligible !== false
+                  ? selectedPlan.trialAmount ?? selectedPlan.amount
+                  : selectedPlan.amount) / 100}{' '}
+                today
+              </p>
+              <p className="mt-1 text-muted-foreground">
+                {selectedPlan.trialDays && selectedPlan.trialEligible !== false
+                  ? `Then ₹${selectedPlan.amount / 100} every ${selectedPlan.billingInterval} ${selectedPlan.billingPeriod} after ${selectedPlan.trialDays} day${selectedPlan.trialDays === 1 ? '' : 's'}.`
+                  : `Then renews at ₹${selectedPlan.amount / 100} every ${selectedPlan.billingInterval} ${selectedPlan.billingPeriod}.`}{' '}
+                You can cancel future renewals.
+              </p>
+            </div>
+          )}
 
           {paymentState === 'success' ? (
             <div className="flex items-center gap-3 rounded-xl bg-success/10 p-4 text-success">
