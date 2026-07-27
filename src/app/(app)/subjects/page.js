@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SearchX } from 'lucide-react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/feedback/empty-state';
 import { ErrorState } from '@/components/feedback/error-state';
@@ -61,9 +60,6 @@ export default function SubjectsPage() {
     track(ANALYTICS_EVENTS.SUBJECT_SELECTED, {
       subjectId: subject.id,
       subjectName: subject.name,
-    });
-    toast.info(`${subject.name} selected`, {
-      description: 'Chapter browsing will be available in the next module.',
     });
   }
 

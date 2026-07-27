@@ -11,4 +11,5 @@ export const API_ENDPOINTS = {
     PROFILE: '/users/profile',
   },
   SUBJECTS: '/subjects',
+  CLASSES: '/classes',
 };
