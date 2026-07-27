@@ -87,11 +87,7 @@ export function ChapterOverview({ chapterId, subjectId, classId, subjectName, cl
   const progress = chapter.progressPercent ?? 0;
   const completed = questions.length > 0 && progress === 100;
 
-  function comingNext(label) {
-    toast.info(`${label} is ready for Phase 7`, {
-      description: 'The question practice experience will connect here next.',
-    });
-  }
+  const practiceHref = `/subjects/${subjectId}/classes/${classId}/chapters/${chapterId}/practice?subject=${encodeURIComponent(subjectName)}&class=${encodeURIComponent(className)}&chapter=${encodeURIComponent(chapter.name)}`;
 
   return (
     <div className="space-y-6">
@@ -148,8 +144,8 @@ export function ChapterOverview({ chapterId, subjectId, classId, subjectName, cl
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Work through the complete chapter question set with instant solutions and progress tracking.
           </p>
-          <Button className="mt-5" onClick={() => comingNext('Practice')}>
-            Start practice
+          <Button className="mt-5" asChild>
+            <Link href={practiceHref}>Start practice</Link>
           </Button>
         </div>
         <div className="rounded-2xl border bg-card p-6">
@@ -158,8 +154,8 @@ export function ChapterOverview({ chapterId, subjectId, classId, subjectName, cl
           <p className="mt-2 text-sm leading-6 text-muted-foreground">
             Focus on the {pyqCount} available JEE PYQs connected to this chapter.
           </p>
-          <Button variant="outline" className="mt-5" onClick={() => comingNext('PYQ practice')}>
-            Explore PYQs
+          <Button variant="outline" className="mt-5" asChild>
+            <Link href={`${practiceHref}&mode=pyq`}>Explore PYQs</Link>
           </Button>
         </div>
       </section>
