@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ArrowLeft, BookOpen, GraduationCap } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,10 @@ import { ANALYTICS_EVENTS } from '@/services/analytics/events';
 export function ClassBrowser({ subjectId, subjectName }) {
   const [selectedClassId, setSelectedClassId] = useState(null);
   const { data: classes = [], isLoading, isError, error, refetch } = useClassesQuery();
+  const selectedClass = useMemo(
+    () => classes.find((classItem) => classItem.id === selectedClassId),
+    [classes, selectedClassId],
+  );
 
   function handleSelect(classItem) {
     setSelectedClassId(classItem.id);
@@ -76,7 +80,20 @@ export function ClassBrowser({ subjectId, subjectName }) {
       ) : classes.length === 0 ? (
         <EmptyState title="No classes available" description="Classes will appear here once they are available." />
       ) : (
-        <ClassGrid classes={classes} selectedClassId={selectedClassId} onSelect={handleSelect} />
+        <>
+          <ClassGrid classes={classes} selectedClassId={selectedClassId} onSelect={handleSelect} />
+          {selectedClass && (
+            <div className="sticky bottom-4 z-20 flex justify-end rounded-2xl border bg-background/90 p-3 shadow-lg backdrop-blur">
+              <Button size="lg" asChild>
+                <Link
+                  href={`/subjects/${subjectId}/classes/${selectedClass.id}/chapters?subject=${encodeURIComponent(subjectName)}&class=${encodeURIComponent(selectedClass.name)}`}
+                >
+                  Continue to chapters
+                </Link>
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
