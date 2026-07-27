@@ -10,4 +10,5 @@ export const API_ENDPOINTS = {
     ME: '/users/me',
     PROFILE: '/users/profile',
   },
+  SUBJECTS: '/subjects',
 };

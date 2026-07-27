@@ -2,7 +2,7 @@ import { BookOpen, Dumbbell, Bookmark, LineChart, FileClock, User, CreditCard } 
 import { ROUTES } from '@/constants/routes';
 
 export const HOME_MODULES = [
-  { key: 'subjects', label: 'Subjects', icon: BookOpen, href: null },
+  { key: 'subjects', label: 'Subjects', icon: BookOpen, href: ROUTES.SUBJECTS },
   { key: 'practice', label: 'Practice', icon: Dumbbell, href: null },
   { key: 'bookmarks', label: 'Bookmarks', icon: Bookmark, href: null },
   { key: 'progress', label: 'Progress', icon: LineChart, href: null },
