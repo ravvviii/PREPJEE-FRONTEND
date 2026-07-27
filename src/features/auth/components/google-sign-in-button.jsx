@@ -41,7 +41,7 @@ export function GoogleSignInButton({ onCredential, disabled }) {
 
   return (
     <>
-      <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" onLoad={renderButton} />
+      <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" onReady={renderButton} />
       <div ref={buttonRef} className={disabled ? 'pointer-events-none opacity-50' : ''} />
     </>
   );
