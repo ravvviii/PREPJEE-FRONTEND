@@ -6,7 +6,9 @@ import { getChapters } from '@/services/api/chapter.api';
 
 export function useChaptersQuery({ subjectId, classId, search }) {
   return useQuery({
-    queryKey: [...QUERY_KEYS.CHAPTERS, subjectId, classId, search],
+    // v2 separates this normalized result from chapter queries cached by the
+    // earlier response-transform implementation during local hot reloads.
+    queryKey: [...QUERY_KEYS.CHAPTERS, 'v3', subjectId, classId, search],
     queryFn: async () => {
       const page = await getChapters({ subjectId, classId, search, limit: 100 });
       return page.items;
