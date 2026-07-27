@@ -33,6 +33,8 @@ import { ConfirmDialog } from '@/components/feedback/confirm-dialog';
 import { ThemeToggle } from '@/components/common/theme-toggle';
 import { useAuth } from '@/context/AuthContext';
 import { useClassesQuery } from '@/features/classes/hooks/use-classes-query';
+import { FEATURES } from '@/features/paywall/config/entitlement-policy';
+import { usePaywall } from '@/features/paywall/providers/paywall-provider';
 import { track } from '@/services/analytics/analytics';
 import { ANALYTICS_EVENTS } from '@/services/analytics/events';
 
@@ -66,6 +68,7 @@ function ProfileSkeleton() {
 
 export function ProfileHub() {
   const { user, isLoading, updateUser, uploadAvatar, logout } = useAuth();
+  const { triggerPaywall } = usePaywall();
   const { data: classes = [] } = useClassesQuery();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -404,8 +407,17 @@ export function ProfileHub() {
                   </div>
                 </div>
                 {!subscriptionActive && (
-                  <Button className="mt-6" disabled>
-                    Upgrade available in Phase 12
+                  <Button
+                    className="mt-6"
+                    onClick={() =>
+                      triggerPaywall({
+                        feature: FEATURES.PREMIUM_ACCESS,
+                        source: 'profile_subscription',
+                        force: true,
+                      })
+                    }
+                  >
+                    Explore Premium
                   </Button>
                 )}
               </div>
