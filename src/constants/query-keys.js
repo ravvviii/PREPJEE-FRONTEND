@@ -3,4 +3,5 @@ export const QUERY_KEYS = {
   SUBJECTS: ['subjects'],
   CLASSES: ['classes'],
   CHAPTERS: ['chapters'],
+  CHAPTER_OVERVIEW: ['chapters', 'overview'],
 };

@@ -13,4 +13,6 @@ export const API_ENDPOINTS = {
   SUBJECTS: '/subjects',
   CLASSES: '/classes',
   CHAPTERS: '/chapters',
+  QUESTIONS: '/questions',
+  BOOKMARKS: '/bookmarks',
 };

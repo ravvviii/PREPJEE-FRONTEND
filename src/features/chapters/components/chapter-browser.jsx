@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, LibraryBig, SearchX } from 'lucide-react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/feedback/empty-state';
 import { ErrorState } from '@/components/feedback/error-state';
@@ -71,7 +70,6 @@ export function ChapterBrowser({ subjectId, classId, subjectName, className }) {
       subjectId,
       classId,
     });
-    toast.info(chapter.name, { description: 'Question practice will open in the next module.' });
   }
 
   return (
@@ -142,7 +140,12 @@ export function ChapterBrowser({ subjectId, classId, subjectName, className }) {
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {visibleChapters.map((chapter) => (
-              <ChapterCard key={chapter.id} chapter={chapter} onSelect={handleSelect} />
+              <ChapterCard
+                key={chapter.id}
+                chapter={chapter}
+                href={`/subjects/${subjectId}/classes/${classId}/chapters/${chapter.id}?subject=${encodeURIComponent(subjectName)}&class=${encodeURIComponent(className)}&chapter=${encodeURIComponent(chapter.name)}`}
+                onSelect={handleSelect}
+              />
             ))}
           </div>
         </div>
