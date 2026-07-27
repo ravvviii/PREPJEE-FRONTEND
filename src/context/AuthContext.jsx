@@ -123,6 +123,15 @@ export function AuthProvider({ children }) {
     return profile;
   }, [setUser]);
 
+  const uploadAvatar = useCallback(
+    async (file) => {
+      const profile = await userApi.uploadAvatar(file);
+      setUser(profile);
+      return profile;
+    },
+    [setUser],
+  );
+
   // Session restore: on first mount, trade a stored refresh token for a
   // fresh access token + profile so a page reload doesn't force re-login.
   useEffect(() => {
@@ -165,6 +174,7 @@ export function AuthProvider({ children }) {
     logout,
     updateUser,
     refreshUser,
+    uploadAvatar,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

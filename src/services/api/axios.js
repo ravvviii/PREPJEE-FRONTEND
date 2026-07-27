@@ -18,6 +18,13 @@ export function unwrap(response) {
 }
 
 apiClient.interceptors.request.use((config) => {
+  // The instance defaults to JSON, but browser FormData must set its own
+  // multipart Content-Type including the generated boundary. Keeping the
+  // JSON header here makes Fastify report "the request is not multipart".
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    config.headers.delete('Content-Type');
+  }
+
   const { accessToken } = useAuthStore.getState();
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
