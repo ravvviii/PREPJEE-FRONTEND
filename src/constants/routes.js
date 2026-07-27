@@ -2,6 +2,8 @@ export const ROUTES = {
   LOGIN: '/login',
   HOME: '/home',
   SUBJECTS: '/subjects',
+  BOOKMARKS: '/bookmarks',
+  PROGRESS: '/progress',
   PROFILE: '/profile',
   ADMIN_LOGIN: '/admin/login',
   ADMIN: '/admin',
