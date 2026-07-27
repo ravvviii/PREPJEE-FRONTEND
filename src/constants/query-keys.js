@@ -7,4 +7,5 @@ export const QUERY_KEYS = {
   QUESTION_SESSION: ['questions', 'session'],
   QUESTION_DETAIL: ['questions', 'detail'],
   BOOKMARKS: ['bookmarks'],
+  QUESTION_ACCURACY: ['questions', 'accuracy'],
 };

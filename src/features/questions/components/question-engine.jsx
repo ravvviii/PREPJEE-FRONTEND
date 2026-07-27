@@ -21,8 +21,10 @@ import { ErrorState } from '@/components/feedback/error-state';
 import { MathContent } from './math-content';
 import { QuestionOption } from './question-option';
 import { QuestionPalette } from './question-palette';
+import { AttemptFeedback } from './attempt-feedback';
 import { useQuestionDetail, useQuestionList } from '../hooks/use-question-session';
 import { useQuestionBookmarks } from '../hooks/use-question-bookmarks';
+import { useQuestionAttempt } from '../hooks/use-question-attempt';
 import { track } from '@/services/analytics/analytics';
 import { ANALYTICS_EVENTS } from '@/services/analytics/events';
 import { cn } from '@/lib/utils';
@@ -40,6 +42,7 @@ export function QuestionEngine({
   const viewedQuestionId = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState(() => new Map());
+  const [attemptResults, setAttemptResults] = useState(() => new Map());
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const listQuery = useQuestionList({ chapterId });
@@ -54,6 +57,24 @@ export function QuestionEngine({
   const currentSummary = questions[currentIndex];
   const detailQuery = useQuestionDetail(currentSummary?.id);
   const { bookmarkedIds, toggleBookmark, isUpdating } = useQuestionBookmarks();
+  const { submit, isSubmitting, accuracy } = useQuestionAttempt(currentSummary?.id, {
+    onSuccess: (result) => {
+      setAttemptResults((previous) => {
+        const next = new Map(previous);
+        next.set(currentSummary.id, result);
+        return next;
+      });
+      track(ANALYTICS_EVENTS.ANSWER_SUBMITTED, {
+        questionId: currentSummary.id,
+        chapterId,
+        isCorrect: result.isCorrect,
+      });
+      track(
+        result.isCorrect ? ANALYTICS_EVENTS.ANSWER_CORRECT : ANALYTICS_EVENTS.ANSWER_WRONG,
+        { questionId: currentSummary.id, chapterId },
+      );
+    },
+  });
 
   const chaptersHref = `/subjects/${subjectId}/classes/${classId}/chapters?subject=${encodeURIComponent(subjectName)}&class=${encodeURIComponent(className)}`;
 
@@ -102,14 +123,14 @@ export function QuestionEngine({
   const selectOption = useCallback(
     (optionIndex) => {
       const detail = detailQuery.data;
-      if (!detail?.options?.[optionIndex]) return;
+      if (!detail?.options?.[optionIndex] || attemptResults.has(detail.id)) return;
       setSelectedAnswers((previous) => {
         const next = new Map(previous);
         next.set(detail.id, detail.options[optionIndex].id);
         return next;
       });
     },
-    [detailQuery.data],
+    [attemptResults, detailQuery.data],
   );
 
   useEffect(() => {
@@ -159,6 +180,26 @@ export function QuestionEngine({
 
   const question = detailQuery.data;
   const selectedOptionId = question ? selectedAnswers.get(question.id) : null;
+  const attemptResult = question ? attemptResults.get(question.id) : null;
+
+  function handleSubmit() {
+    if (!question || !selectedOptionId || attemptResult) return;
+    submit({ selectedOptionId });
+  }
+
+  function handleRetry() {
+    if (!question) return;
+    setSelectedAnswers((previous) => {
+      const next = new Map(previous);
+      next.delete(question.id);
+      return next;
+    });
+    setAttemptResults((previous) => {
+      const next = new Map(previous);
+      next.delete(question.id);
+      return next;
+    });
+  }
 
   return (
     <div ref={engineRef} className={cn('bg-background', isFullscreen && 'h-screen overflow-auto p-4 sm:p-6')}>
@@ -254,10 +295,28 @@ export function QuestionEngine({
                       option={option}
                       index={index}
                       selected={selectedOptionId === option.id}
+                      resultState={
+                        attemptResult?.correctOptionIds.includes(option.id)
+                          ? 'correct'
+                          : attemptResult && selectedOptionId === option.id
+                            ? 'wrong'
+                            : null
+                      }
+                      disabled={Boolean(attemptResult)}
                       onSelect={() => selectOption(index)}
                     />
                   ))}
                 </div>
+                {!attemptResult && (
+                  <div className="mt-5 flex justify-end">
+                    <Button onClick={handleSubmit} disabled={!selectedOptionId || isSubmitting}>
+                      {isSubmitting ? 'Submitting…' : 'Submit answer'}
+                    </Button>
+                  </div>
+                )}
+                {attemptResult && (
+                  <AttemptFeedback result={attemptResult} accuracy={accuracy} onRetry={handleRetry} />
+                )}
               </>
             )}
 
