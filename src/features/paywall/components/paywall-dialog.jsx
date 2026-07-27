@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { BarChart3, BookOpenCheck, CheckCircle2, Loader2, ShieldCheck, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
@@ -16,7 +16,12 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { track } from '@/services/analytics/analytics';
 import { ANALYTICS_EVENTS } from '@/services/analytics/events';
-import { createPaymentOrder, getSubscriptionPlans, verifyPayment } from '../services/payment.api';
+import {
+  clearCheckoutIdempotencyKey,
+  createPaymentOrder,
+  getSubscriptionPlans,
+  verifyPayment,
+} from '../services/payment.api';
 import { loadRazorpay } from '../lib/razorpay';
 import { PlanCard } from './plan-card';
 
@@ -30,6 +35,7 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
   const { user, refreshUser } = useAuth();
   const [selectedPlanId, setSelectedPlanId] = useState(request?.planId ?? null);
   const [paymentState, setPaymentState] = useState('idle');
+  const paymentStartingRef = useRef(false);
 
   const plansQuery = useQuery({
     queryKey: ['subscription-plans'],
@@ -60,7 +66,8 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
   };
 
   const startPayment = async () => {
-    if (!selectedPlan) return;
+    if (!selectedPlan || paymentStartingRef.current) return;
+    paymentStartingRef.current = true;
     setPaymentState('creating_order');
     track(ANALYTICS_EVENTS.PAYMENT_STARTED, properties);
 
@@ -103,6 +110,7 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
               razorpaySignature: response.razorpay_signature,
             });
             await refreshUser();
+            clearCheckoutIdempotencyKey(selectedPlan.id);
             setPaymentState('success');
             track(ANALYTICS_EVENTS.PAYMENT_SUCCEEDED, properties);
             track(ANALYTICS_EVENTS.SUBSCRIPTION_ACTIVATED, properties);
@@ -117,6 +125,7 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
       });
 
       checkout.on('payment.failed', (response) => {
+        clearCheckoutIdempotencyKey(selectedPlan.id);
         setPaymentState('failed');
         track(ANALYTICS_EVENTS.PAYMENT_FAILED, {
           ...properties,
@@ -128,9 +137,17 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
       track(ANALYTICS_EVENTS.RAZORPAY_OPENED, properties);
       checkout.open();
     } catch (error) {
+      if (
+        error.code === 'CHECKOUT_ALREADY_COMPLETED' ||
+        error.code === 'IDEMPOTENCY_KEY_REUSED'
+      ) {
+        clearCheckoutIdempotencyKey(selectedPlan.id);
+      }
       setPaymentState('failed');
       track(ANALYTICS_EVENTS.PAYMENT_FAILED, { ...properties, code: error.code });
       toast.error(error.message || 'Could not start payment. Please retry.');
+    } finally {
+      paymentStartingRef.current = false;
     }
   };
 
