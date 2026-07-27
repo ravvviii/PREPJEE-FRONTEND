@@ -27,7 +27,11 @@ export const ENTITLEMENT_POLICY = {
   [FEATURES.PRACTICE]: { access: ENTITLEMENT_ACCESS.FREE },
   [FEATURES.QUESTION_EXPLANATION]: { access: ENTITLEMENT_ACCESS.FREE },
   [FEATURES.PYQ_ACCESS]: { access: ENTITLEMENT_ACCESS.FREE },
-  [FEATURES.BOOKMARKS]: { access: ENTITLEMENT_ACCESS.FREE },
+  [FEATURES.BOOKMARKS]: {
+    access: ENTITLEMENT_ACCESS.PREMIUM,
+    title: 'Save questions for focused revision',
+    description: 'Unlock Premium to bookmark important questions and revisit them anytime.',
+  },
   [FEATURES.PROGRESS_DASHBOARD]: { access: ENTITLEMENT_ACCESS.FREE },
   [FEATURES.PREMIUM_ACCESS]: {
     access: ENTITLEMENT_ACCESS.PREMIUM,

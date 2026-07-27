@@ -4,9 +4,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { QUERY_KEYS } from '@/constants/query-keys';
 import { addBookmark, getBookmarks, removeBookmark } from '@/services/api/bookmark.api';
+import { FEATURES } from '@/features/paywall/config/entitlement-policy';
+import { usePaywall } from '@/features/paywall/providers/paywall-provider';
 
 export function useQuestionBookmarks() {
   const queryClient = useQueryClient();
+  const { canAccess, triggerPaywall } = usePaywall();
   const bookmarksQuery = useQuery({
     queryKey: QUERY_KEYS.BOOKMARKS,
     queryFn: () => getBookmarks({ limit: 100 }),
@@ -26,10 +29,27 @@ export function useQuestionBookmarks() {
     bookmarksQuery.data?.items.map((bookmark) => bookmark.questionId) ?? [],
   );
 
+  const toggleBookmark = (questionId) => {
+    const bookmarked = bookmarkedIds.has(questionId);
+
+    // Existing bookmarks can always be removed. Adding a new bookmark follows
+    // the centralized entitlement policy and resumes automatically after payment.
+    if (!bookmarked && !canAccess(FEATURES.BOOKMARKS).allowed) {
+      triggerPaywall({
+        feature: FEATURES.BOOKMARKS,
+        source: 'question_bookmark',
+        metadata: { questionId },
+        onSuccess: () => mutation.mutate({ questionId, bookmarked: false }),
+      });
+      return;
+    }
+
+    mutation.mutate({ questionId, bookmarked });
+  };
+
   return {
     bookmarkedIds,
-    toggleBookmark: (questionId) =>
-      mutation.mutate({ questionId, bookmarked: bookmarkedIds.has(questionId) }),
+    toggleBookmark,
     isUpdating: mutation.isPending,
   };
 }
