@@ -285,6 +285,8 @@ export function QuestionEngine({
                   <img
                     src={question.questionImageUrl}
                     alt="Question illustration"
+                    loading="eager"
+                    decoding="async"
                     className="mt-5 max-h-96 rounded-xl border object-contain"
                   />
                 )}

@@ -105,7 +105,7 @@ export function AdminShell({ children }) {
             </Button>
           </div>
         </header>
-        <main className="p-4 sm:p-6 lg:p-8">{children}</main>
+        <main id="main-content" tabIndex={-1} className="p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

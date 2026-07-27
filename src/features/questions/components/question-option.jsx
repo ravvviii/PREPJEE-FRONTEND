@@ -56,6 +56,8 @@ export function QuestionOption({ option, index, selected, resultState, disabled,
           <img
             src={option.optionImageUrl}
             alt={`Option ${LABELS[index] ?? index + 1}`}
+            loading="lazy"
+            decoding="async"
             className="mt-2 max-h-64 rounded-lg object-contain"
           />
         )}

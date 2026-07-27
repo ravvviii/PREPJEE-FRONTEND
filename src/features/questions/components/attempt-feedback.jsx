@@ -49,6 +49,8 @@ export function AttemptFeedback({ result, accuracy, onRetry }) {
             <img
               src={result.explanation.solutionImageUrl}
               alt="Solution illustration"
+              loading="lazy"
+              decoding="async"
               className="mt-4 max-h-96 rounded-lg border object-contain"
             />
           )}

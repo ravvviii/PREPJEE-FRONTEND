@@ -8,7 +8,7 @@ export default function AppLayout({ children }) {
     <RequireAuth>
       <div className="flex min-h-screen flex-col">
         <Navbar />
-        <main className="flex-1 py-8">
+        <main id="main-content" tabIndex={-1} className="flex-1 py-8">
           <Container>{children}</Container>
         </main>
         <Footer />

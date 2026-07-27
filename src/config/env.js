@@ -13,4 +13,5 @@ export const env = {
   amplitudeKey: withFallback(process.env.NEXT_PUBLIC_AMPLITUDE_KEY),
   razorpayKey: withFallback(process.env.NEXT_PUBLIC_RAZORPAY_KEY),
   appName: withFallback(process.env.NEXT_PUBLIC_APP_NAME, 'PrepJEE'),
+  appUrl: withFallback(process.env.NEXT_PUBLIC_APP_URL, 'http://localhost:3000'),
 };

@@ -1,21 +1,31 @@
-import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/providers/providers';
 import { env } from '@/config/env';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
-
 export const metadata = {
-  title: `${env.appName} — JEE Exam Preparation`,
-  description: 'Practice questions, track progress, and prepare for JEE with PrepJEE.',
+  metadataBase: new URL(env.appUrl),
+  title: {
+    default: `${env.appName} — JEE Exam Preparation`,
+    template: `%s | ${env.appName}`,
+  },
+  description: 'Practice JEE questions and PYQs, track accuracy, build streaks, and improve weak chapters.',
+  applicationName: env.appName,
+  keywords: ['JEE preparation', 'JEE Main', 'JEE Advanced', 'JEE PYQs', 'exam practice'],
+  manifest: '/manifest.webmanifest',
+  openGraph: {
+    type: 'website',
+    url: '/',
+    siteName: env.appName,
+    title: `${env.appName} — JEE Exam Preparation`,
+    description: 'Practice questions, track progress, and prepare smarter for JEE.',
+  },
+  twitter: {
+    card: 'summary',
+    title: `${env.appName} — JEE Exam Preparation`,
+    description: 'Practice questions, track progress, and prepare smarter for JEE.',
+  },
+  appleWebApp: { capable: true, title: env.appName, statusBarStyle: 'default' },
+  formatDetection: { telephone: false },
 };
 
 export default function RootLayout({ children }) {
@@ -23,9 +33,15 @@ export default function RootLayout({ children }) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className="h-full antialiased"
     >
       <body className="flex min-h-full flex-col">
+        <a
+          href="#main-content"
+          className="fixed top-2 left-2 z-[100] -translate-y-20 rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground transition-transform focus:translate-y-0"
+        >
+          Skip to main content
+        </a>
         <Providers>{children}</Providers>
       </body>
     </html>

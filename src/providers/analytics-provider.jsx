@@ -35,6 +35,27 @@ export function AnalyticsProvider({ children }) {
     return () => window.removeEventListener('beforeunload', handleUnload);
   }, []);
 
+  useEffect(() => {
+    const reportError = (error, source) => {
+      track(ANALYTICS_EVENTS.UNHANDLED_ERROR, {
+        source,
+        name: error?.name || 'Error',
+        message: String(error?.message || error || 'Unknown error').slice(0, 300),
+        path: window.location.pathname,
+      });
+    };
+
+    const handleError = (event) => reportError(event.error || event.message, 'window');
+    const handleRejection = (event) => reportError(event.reason, 'promise');
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleRejection);
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleRejection);
+    };
+  }, []);
+
   return (
     <>
       <Suspense fallback={null}>
