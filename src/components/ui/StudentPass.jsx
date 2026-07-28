@@ -19,7 +19,7 @@ export function StudentPass({ className, onClick }) {
         })
       }
       className={cn(
-        'inline-flex items-center gap-2 rounded-2xl border border-[#EEC75E] bg-[#0B0B0B] px-5 py-2 transition-all duration-200 hover:bg-[#151515] hover:shadow-[0_0_20px_rgba(238,199,94,0.2)]',
+        'inline-flex items-center gap-1 rounded-xl  bg-[#0B0B0B] px-4 py-2 transition-all duration-200 hover:bg-[#151515] hover:shadow-[0_0_20px_rgba(238,199,94,0.2)]',
         className
       )}
     >
@@ -28,7 +28,7 @@ export function StudentPass({ className, onClick }) {
         strokeWidth={1.8}
       />
 
-      <span className="text-base font-semibold text-[#EEC75E]">
+      <span className="text-base font-medium text-[#EEC75E]">
         Student Pass
       </span>
     </button>

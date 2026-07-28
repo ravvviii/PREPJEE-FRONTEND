@@ -98,7 +98,7 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
     style={bgColor('HomeBG')}
      >
-      <div className="mx-auto flex h-16  items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-14  items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href={isAuthenticated ? ROUTES.HOME : ROUTES.LOGIN} className="text-lg font-bold text-primary">
           {env.appName}
         </Link>
