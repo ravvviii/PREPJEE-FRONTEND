@@ -2,11 +2,11 @@ import { BookOpen, Dumbbell, Bookmark, LineChart, FileClock, User, CreditCard } 
 import { ROUTES } from '@/constants/routes';
 
 export const HOME_MODULES = [
-  { key: 'subjects', label: 'Subjects', icon: BookOpen, href: ROUTES.SUBJECTS },
-  { key: 'practice', label: 'Practice', icon: Dumbbell, href: null },
-  { key: 'bookmarks', label: 'Bookmarks', icon: Bookmark, href: ROUTES.BOOKMARKS },
-  { key: 'progress', label: 'Progress', icon: LineChart, href: ROUTES.PROGRESS },
-  { key: 'mock-tests', label: 'Mock Tests', icon: FileClock, href: null },
-  { key: 'profile', label: 'Profile', icon: User, href: ROUTES.PROFILE },
-  { key: 'subscription', label: 'Subscription', icon: CreditCard, href: null },
+  { key: 'overview', label: 'Overview', href: ROUTES.HOME, nav: { show: true } },
+  { key: 'subjects', label: 'Subjects', icon: BookOpen, href: ROUTES.SUBJECTS, nav: { show: true } },
+  { key: 'mock-tests', label: 'Mock Tests', icon: FileClock, href: null, nav: { show: true, label: 'Mock Tests' } },
+  { key: 'practice', label: 'Practice', icon: Dumbbell, href: null, nav: { show: true } },
+  { key: 'progress', label: 'Progress', icon: LineChart, href: ROUTES.PROGRESS, nav: { show: true } },
 ];
+
+export const NAVBAR_MODULES = HOME_MODULES.filter((module) => module.nav?.show);

@@ -58,11 +58,11 @@ export default function HomePage() {
   return (
     <div className="space-y-6">
       <WelcomeBanner user={user} />
-      <StatsSummary stats={user?.stats} />
+      {/* <StatsSummary stats={user?.stats} />
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">Jump back in</h2>
         <ModulesGrid />
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -10,7 +10,13 @@ export function ModuleCard({ moduleKey, label, icon: Icon, href }) {
     <div className="group flex h-full flex-col gap-3 rounded-xl border bg-card p-5 transition-colors hover:border-primary/40">
       <div className="flex items-center justify-between">
         <div className="rounded-lg bg-primary/10 p-2 text-primary">
-          <Icon className="h-5 w-5" />
+         {Icon ? (
+          <div className="rounded-lg bg-primary/10 p-2 text-primary">
+            <Icon className="h-5 w-5" />
+          </div>
+        ) : (
+          <div />
+        )}
         </div>
         {!href && (
           <Badge variant="secondary" className="text-xs">
