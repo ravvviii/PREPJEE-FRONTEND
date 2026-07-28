@@ -16,6 +16,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { track } from '@/services/analytics/analytics';
 import { ANALYTICS_EVENTS } from '@/services/analytics/events';
+import { THEME_COLORS } from '@/config/theme';
 import {
   clearCheckoutIdempotencyKey,
   createPaymentOrder,
@@ -101,7 +102,7 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
           email: user?.email || '',
           contact: user?.phone || '',
         },
-        theme: { color: '#6366f1' },
+        theme: { color: THEME_COLORS.external.primary },
         modal: {
           ondismiss: () => {
             setPaymentState('idle');
