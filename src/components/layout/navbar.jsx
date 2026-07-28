@@ -22,6 +22,7 @@ import { NAVBAR_MODULES } from '@/features/home/constants/modules';
 import { track } from '@/services/analytics/analytics';
 import { ANALYTICS_EVENTS } from '@/services/analytics/events';
 import { cn } from '@/lib/utils';
+import { useThemeColors } from '@/hooks/use-theme-colors';
 
 function initialsOf(name) {
   if (!name) return '?';
@@ -36,7 +37,7 @@ function initialsOf(name) {
 function NavbarModuleLink({ module, activePath, onSelect, className }) {
   const label = module.nav?.label ?? module.label;
   const isActive = module.href && (activePath === module.href || activePath.startsWith(`${module.href}/`));
-  const Icon = module.icon 
+  const Icon = module.icon
 
   const sharedClassName = cn(
     'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors',
@@ -80,9 +81,12 @@ export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const { bgColor } = useThemeColors();
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    style={bgColor('HomeBG')}
+     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href={isAuthenticated ? ROUTES.HOME : ROUTES.LOGIN} className="text-lg font-bold text-primary">
           {env.appName}

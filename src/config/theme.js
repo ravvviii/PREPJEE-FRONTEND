@@ -1,6 +1,6 @@
 export const COLORS = {
   light: {
-    HomeBG: '#F6F7F7',
+    HomeBG: '#f6f7f7',
     Primary: '#6366f1',
     AppBackground: '#09090b',
     NavBG: '#FFFFFF',
