@@ -1,6 +1,6 @@
 'use client';
 
-import { Sparkles } from 'lucide-react';
+import { Sparkle, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePaywall } from '@/features/paywall/providers/paywall-provider';
 import { FEATURES } from '@/features/paywall/config/entitlement-policy';
@@ -23,9 +23,9 @@ export function StudentPass({ className, onClick }) {
         className
       )}
     >
-      <Sparkles
-        className="h-5 w-5 fill-[#EEC75E] text-[#EEC75E]"
-        strokeWidth={1.8}
+      <Sparkle
+        className="h-4 w-4 fill-[#EEC75E] text-[#EEC75E]"
+        strokeWidth={0.5}
       />
 
       <span className="text-base font-medium text-[#EEC75E]">
