@@ -4,12 +4,14 @@ export const COLORS = {
     Primary: '#6366f1',
     AppBackground: '#09090b',
     NavBG: '#FFFFFF',
+    NavBottomLine:'#0D0C0D'
   },
   dark: {
     HomeBG: '#09090b',
     Primary: '#6366f1',
     AppBackground: '#09090b',
     NavBG: '#09090b',
+    NavBottomLine:'#FFFFFF'
   },
 };
 

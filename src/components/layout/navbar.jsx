@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { Lock, Menu, LogOut, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -34,15 +35,16 @@ function initialsOf(name) {
     .toUpperCase();
 }
 
-function NavbarModuleLink({ module, activePath, onSelect, className }) {
+function NavbarModuleLink({ module, activePath, onSelect, className, activeLineColor, withActiveLine = false }) {
   const label = module.nav?.label ?? module.label;
   const isActive = module.href && (activePath === module.href || activePath.startsWith(`${module.href}/`));
-  const Icon = module.icon
+  const Icon = module.icon;
 
   const sharedClassName = cn(
-    'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors',
-    ' hover:text-foreground',
-    isActive && 'bg-muted text-foreground',
+    'relative flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors',
+    'rounded-lg hover:text-foreground',
+    withActiveLine && 'h-full rounded-none px-4 py-0',
+    isActive && 'text-foreground',
     !module.href && 'cursor-not-allowed opacity-60 hover:bg-transparent hover:text-muted-foreground',
     className
   );
@@ -52,6 +54,14 @@ function NavbarModuleLink({ module, activePath, onSelect, className }) {
       {Icon &&<Icon className="h-4 w-4" />}
       <span>{label}</span>
       {!module.href && <Lock className="h-3.5 w-3.5" aria-label="Coming soon" />}
+      {withActiveLine && isActive && (
+        <motion.span
+          layoutId="navbar-active-bottom-line"
+          className="absolute right-0 bottom-0 left-0 h-[3px]"
+          style={{ backgroundColor: activeLineColor }}
+          transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+        />
+      )}
     </>
   );
 
@@ -81,7 +91,7 @@ export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
-  const { bgColor } = useThemeColors();
+  const { bgColor, color } = useThemeColors();
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
@@ -93,9 +103,9 @@ export function Navbar() {
         </Link>
 
         {isAuthenticated && (
-          <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex" aria-label="Main navigation">
+          <nav className="hidden h-full flex-1 items-center justify-center gap-1 lg:flex" aria-label="Main navigation">
             {NAVBAR_MODULES.map((module) => (
-              <NavbarModuleLink key={module.key} module={module} activePath={pathname} />
+              <NavbarModuleLink key={module.key} module={module} activePath={pathname} activeLineColor={color('NavBottomLine')} withActiveLine/>
             ))}
           </nav>
         )}
