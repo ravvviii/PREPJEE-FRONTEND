@@ -24,6 +24,7 @@ import { track } from '@/services/analytics/analytics';
 import { ANALYTICS_EVENTS } from '@/services/analytics/events';
 import { cn } from '@/lib/utils';
 import { useThemeColors } from '@/hooks/use-theme-colors';
+import { StudentPass } from '../ui/StudentPass';
 
 function initialsOf(name) {
   if (!name) return '?';
@@ -97,7 +98,7 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
     style={bgColor('HomeBG')}
      >
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16  items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href={isAuthenticated ? ROUTES.HOME : ROUTES.LOGIN} className="text-lg font-bold text-primary">
           {env.appName}
         </Link>
@@ -109,9 +110,12 @@ export function Navbar() {
             ))}
           </nav>
         )}
+        {isAuthenticated && (
+          <StudentPass />
+        )}
 
         <div className="hidden items-center gap-2 sm:flex">
-          <ThemeToggle />
+          {/* <ThemeToggle /> */}
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -120,7 +124,7 @@ export function Navbar() {
                     <AvatarImage src={user?.avatarUrl ?? undefined} alt={user?.name ?? 'User'} />
                     <AvatarFallback>{initialsOf(user?.name)}</AvatarFallback>
                   </Avatar>
-                  <span className="max-w-[10rem] truncate">{user?.name ?? user?.phone ?? 'Account'}</span>
+                  {/* <span className="max-w-[10rem] truncate">{user?.name ?? user?.phone ?? 'Account'}</span> */}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -151,7 +155,7 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-1 sm:hidden">
-          <ThemeToggle />
+          {/* <ThemeToggle /> */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="Open menu">
