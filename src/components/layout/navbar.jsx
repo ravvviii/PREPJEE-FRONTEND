@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { Lock, Menu, LogOut, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,6 +23,8 @@ import { NAVBAR_MODULES } from '@/features/home/constants/modules';
 import { track } from '@/services/analytics/analytics';
 import { ANALYTICS_EVENTS } from '@/services/analytics/events';
 import { cn } from '@/lib/utils';
+import { useThemeColors } from '@/hooks/use-theme-colors';
+import { StudentPass } from '../ui/StudentPass';
 
 function initialsOf(name) {
   if (!name) return '?';
@@ -33,15 +36,16 @@ function initialsOf(name) {
     .toUpperCase();
 }
 
-function NavbarModuleLink({ module, activePath, onSelect, className }) {
+function NavbarModuleLink({ module, activePath, onSelect, className, activeLineColor, withActiveLine = false }) {
   const label = module.nav?.label ?? module.label;
   const isActive = module.href && (activePath === module.href || activePath.startsWith(`${module.href}/`));
-  const Icon = module.icon 
+  const Icon = module.icon;
 
   const sharedClassName = cn(
-    'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors',
-    ' hover:text-foreground',
-    isActive && 'bg-muted text-foreground',
+    'relative flex items-center gap-2 px-3 py-2 text-sm font-medium text-muted-foreground transition-colors',
+    'rounded-lg hover:text-foreground',
+    withActiveLine && 'h-full rounded-none px-4',
+    isActive && 'text-foreground',
     !module.href && 'cursor-not-allowed opacity-60 hover:bg-transparent hover:text-muted-foreground',
     className
   );
@@ -51,6 +55,14 @@ function NavbarModuleLink({ module, activePath, onSelect, className }) {
       {Icon &&<Icon className="h-4 w-4" />}
       <span>{label}</span>
       {!module.href && <Lock className="h-3.5 w-3.5" aria-label="Coming soon" />}
+      {withActiveLine && isActive && (
+        <motion.span
+          layoutId="navbar-active-bottom-line"
+          className="absolute -bottom-[10px] left-0 right-0 h-[3px]"
+          style={{ backgroundColor: activeLineColor }}
+          transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+        />
+      )}
     </>
   );
 
@@ -80,40 +92,66 @@ export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const { bgColor, color } = useThemeColors();
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href={isAuthenticated ? ROUTES.HOME : ROUTES.LOGIN} className="text-lg font-bold text-primary">
-          {env.appName}
-        </Link>
+    <header
+      className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      style={bgColor("HomeBG")}
+    >
+      <div className="mx-auto flex h-14  items-center px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-10">
+          <Link
+            href={isAuthenticated ? ROUTES.HOME : ROUTES.LOGIN}
+            className="text-lg font-bold text-primary"
+          >
+            {env.appName}
+          </Link>
 
-        {isAuthenticated && (
-          <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex" aria-label="Main navigation">
-            {NAVBAR_MODULES.map((module) => (
-              <NavbarModuleLink key={module.key} module={module} activePath={pathname} />
-            ))}
-          </nav>
-        )}
+          {isAuthenticated && (
+            <nav
+              className="hidden h-full items-center gap-1 lg:flex"
+              aria-label="Main navigation"
+            >
+              {NAVBAR_MODULES.map((module) => (
+                <NavbarModuleLink
+                  key={module.key}
+                  module={module}
+                  activePath={pathname}
+                  activeLineColor={color("NavBottomLine")}
+                  withActiveLine
+                />
+              ))}
+            </nav>
+          )}
+        </div>
 
-        <div className="hidden items-center gap-2 sm:flex">
-          <ThemeToggle />
+        <div className="ml-auto hidden items-center gap-2 sm:flex">
+        {isAuthenticated && <StudentPass />}
+          {/* <ThemeToggle /> */}
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="gap-2 px-2">
                   <Avatar className="h-7 w-7">
-                    <AvatarImage src={user?.avatarUrl ?? undefined} alt={user?.name ?? 'User'} />
+                    <AvatarImage
+                      src={user?.avatarUrl ?? undefined}
+                      alt={user?.name ?? "User"}
+                    />
                     <AvatarFallback>{initialsOf(user?.name)}</AvatarFallback>
                   </Avatar>
-                  <span className="max-w-[10rem] truncate">{user?.name ?? user?.phone ?? 'Account'}</span>
+                  {/* <span className="max-w-[10rem] truncate">{user?.name ?? user?.phone ?? 'Account'}</span> */}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
                   <Link
                     href={ROUTES.PROFILE}
-                    onClick={() => track(ANALYTICS_EVENTS.PROFILE_VIEWED, { source: 'navbar' })}
+                    onClick={() =>
+                      track(ANALYTICS_EVENTS.PROFILE_VIEWED, {
+                        source: "navbar",
+                      })
+                    }
                   >
                     <UserIcon className="mr-2 h-4 w-4" /> Profile
                   </Link>
@@ -121,7 +159,7 @@ export function Navbar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => {
-                    track(ANALYTICS_EVENTS.LOGOUT, { source: 'navbar' });
+                    track(ANALYTICS_EVENTS.LOGOUT, { source: "navbar" });
                     logout();
                   }}
                 >
@@ -137,7 +175,7 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-1 sm:hidden">
-          <ThemeToggle />
+          {/* <ThemeToggle /> */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="Open menu">
@@ -151,7 +189,10 @@ export function Navbar() {
               <div className="flex flex-col gap-2 px-4">
                 {isAuthenticated ? (
                   <>
-                    <nav className="flex flex-col gap-1" aria-label="Main navigation">
+                    <nav
+                      className="flex flex-col gap-1"
+                      aria-label="Main navigation"
+                    >
                       {NAVBAR_MODULES.map((module) => (
                         <NavbarModuleLink
                           key={module.key}
@@ -164,7 +205,10 @@ export function Navbar() {
                     </nav>
                     <div className="my-2 h-px bg-border" />
                     <Button variant="ghost" className="justify-start" asChild>
-                      <Link href={ROUTES.PROFILE} onClick={() => setMobileOpen(false)}>
+                      <Link
+                        href={ROUTES.PROFILE}
+                        onClick={() => setMobileOpen(false)}
+                      >
                         <UserIcon className="mr-2 h-4 w-4" /> Profile
                       </Link>
                     </Button>
@@ -181,7 +225,10 @@ export function Navbar() {
                   </>
                 ) : (
                   <Button asChild>
-                    <Link href={ROUTES.LOGIN} onClick={() => setMobileOpen(false)}>
+                    <Link
+                      href={ROUTES.LOGIN}
+                      onClick={() => setMobileOpen(false)}
+                    >
                       Log in
                     </Link>
                   </Button>

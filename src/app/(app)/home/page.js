@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorState } from '@/components/feedback/error-state';
-import { WelcomeBanner } from '@/features/home/components/welcome-banner';
+import { DashboardHero } from '@/features/home/components/welcome-banner';
 import { StatsSummary } from '@/features/home/components/stats-summary';
 import { ModulesGrid } from '@/features/home/components/modules-grid';
 import { useMeQuery } from '@/features/home/hooks/use-me-query';
@@ -57,7 +57,7 @@ export default function HomePage() {
 
   return (
     <div className="space-y-6">
-      <WelcomeBanner user={user} />
+      <DashboardHero user={user} />
       {/* <StatsSummary stats={user?.stats} />
       <div className="space-y-3">
         <h2 className="text-lg font-semibold">Jump back in</h2>

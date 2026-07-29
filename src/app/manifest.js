@@ -1,4 +1,5 @@
 import { env } from '@/config/env';
+import { THEME_COLORS } from '@/config/theme';
 
 export default function manifest() {
   return {
@@ -7,8 +8,8 @@ export default function manifest() {
     description: 'Practice JEE questions, PYQs, and track your progress.',
     start_url: '/home',
     display: 'standalone',
-    background_color: '#09090b',
-    theme_color: '#6366f1',
+    background_color: THEME_COLORS.external.background,
+    theme_color: THEME_COLORS.external.primary,
     orientation: 'portrait-primary',
     icons: [
       {
