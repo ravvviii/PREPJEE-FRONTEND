@@ -10,21 +10,10 @@ import { ErrorState } from '@/components/feedback/error-state';
 import { ClassGrid } from './class-grid';
 import { ClassSkeleton } from './class-skeleton';
 import { useClassesQuery } from '../hooks/use-classes-query';
+import { sortClasses } from '../utils/class-order';
 import { ROUTES } from '@/constants/routes';
 import { track } from '@/services/analytics/analytics';
 import { ANALYTICS_EVENTS } from '@/services/analytics/events';
-
-// Backend order isn't guaranteed to match the natural progression students
-// expect — pin the common tracks first, anything else keeps its incoming order after.
-const CLASS_ORDER = ['class 11', 'class 12', 'dropper'];
-
-function sortClasses(classes) {
-  return [...classes].sort((a, b) => {
-    const rankA = CLASS_ORDER.indexOf(a.name.trim().toLowerCase());
-    const rankB = CLASS_ORDER.indexOf(b.name.trim().toLowerCase());
-    return (rankA === -1 ? CLASS_ORDER.length : rankA) - (rankB === -1 ? CLASS_ORDER.length : rankB);
-  });
-}
 
 export function ClassBrowser({ subjectId, subjectName }) {
   const router = useRouter();
@@ -52,7 +41,7 @@ export function ClassBrowser({ subjectId, subjectName }) {
         </Link>
       </Button>
 
-      <div className="overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/12 via-card to-card p-6 sm:p-8">
+      {/* <div className="overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/12 via-card to-card p-6 sm:p-8">
         <div className="flex max-w-2xl flex-col gap-3">
           <div className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <GraduationCap className="size-5" aria-hidden="true" />
@@ -68,7 +57,7 @@ export function ClassBrowser({ subjectId, subjectName }) {
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div>
         <h2 className="text-lg font-semibold">Available classes</h2>

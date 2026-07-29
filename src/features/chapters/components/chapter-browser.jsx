@@ -19,9 +19,9 @@ const DIFFICULTY_RANK = { easy: 1, medium: 2, hard: 3 };
 
 function ChapterSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="space-y-3">
       {Array.from({ length: 6 }).map((_, index) => (
-        <Skeleton key={index} className="h-72 rounded-2xl" />
+        <Skeleton key={index} className="h-20 rounded-2xl" />
       ))}
     </div>
   );
@@ -138,7 +138,7 @@ export function ChapterBrowser({ subjectId, classId, subjectName, className }) {
           <div className="mb-3 text-sm text-muted-foreground">
             {visibleChapters.length} {visibleChapters.length === 1 ? 'chapter' : 'chapters'}
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-3">
             {visibleChapters.map((chapter) => (
               <ChapterCard
                 key={chapter.id}
