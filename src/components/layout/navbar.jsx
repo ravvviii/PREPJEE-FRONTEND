@@ -17,6 +17,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/common/theme-toggle';
 import { useAuth } from '@/context/AuthContext';
+import { useIsPremium } from '@/features/paywall/hooks/use-is-premium';
 import { ROUTES } from '@/constants/routes';
 import { env } from '@/config/env';
 import { NAVBAR_MODULES } from '@/features/home/constants/modules';
@@ -90,6 +91,7 @@ function NavbarModuleLink({ module, activePath, onSelect, className, activeLineC
 
 export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
+  const { isPremium } = useIsPremium();
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
   const { bgColor, color } = useThemeColors();
@@ -127,7 +129,7 @@ export function Navbar() {
         </div>
 
         <div className="ml-auto hidden items-center gap-2 sm:flex">
-        {isAuthenticated && <StudentPass />}
+        {isAuthenticated && !isPremium && <StudentPass />}
           {/* <ThemeToggle /> */}
           {isAuthenticated ? (
             <DropdownMenu>

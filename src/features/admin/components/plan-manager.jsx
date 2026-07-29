@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Pencil, Plus, Star } from 'lucide-react';
+import { Loader2, Pencil, Plus, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AdminPageHeader } from './admin-page-header';
-import { createAdminResource, listAdminResource, updateAdminResource } from '../services/admin-api';
+import {
+  createAdminResource,
+  createRazorpayPlan,
+  listAdminResource,
+  updateAdminResource,
+} from '../services/admin-api';
 
 const EMPTY = {
   name: '',
@@ -73,6 +78,21 @@ export function PlanManager() {
       qc.invalidateQueries({ queryKey: ['admin', 'subscription-plans'] });
       setEditing(null);
       toast.success('Plan saved');
+    },
+    onError: (e) => toast.error(e.message),
+  });
+  const createProviderPlan = useMutation({
+    mutationFn: () =>
+      createRazorpayPlan({
+        name: form.name,
+        amount: Math.round(Number(form.amount) * 100),
+        currency: form.currency,
+        billingPeriod: form.billingPeriod,
+        billingInterval: Number(form.billingInterval),
+      }),
+    onSuccess: (result) => {
+      setForm((current) => ({ ...current, providerPlanId: result.providerPlanId }));
+      toast.success('Plan created on Razorpay');
     },
     onError: (e) => toast.error(e.message),
   });
@@ -148,7 +168,25 @@ export function PlanManager() {
               </div>
               <div className="space-y-2"><Label>Billing interval</Label><Input type="number" min="1" value={form.billingInterval} onChange={(e) => setForm({ ...form, billingInterval: e.target.value })} /></div>
               <div className="space-y-2"><Label>Total renewal cycles</Label><Input type="number" min="1" value={form.totalCount} onChange={(e) => setForm({ ...form, totalCount: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Razorpay Plan ID</Label><Input placeholder="plan_..." value={form.providerPlanId} onChange={(e) => setForm({ ...form, providerPlanId: e.target.value })} /></div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Razorpay Plan ID</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="plan_..."
+                    value={form.providerPlanId}
+                    onChange={(e) => setForm({ ...form, providerPlanId: e.target.value })}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={!form.name || Number(form.amount) < 1 || Number(form.billingInterval) < 1 || createProviderPlan.isPending}
+                    onClick={() => createProviderPlan.mutate()}
+                  >
+                    {createProviderPlan.isPending && <Loader2 className="animate-spin" />}
+                    Create on Razorpay
+                  </Button>
+                </div>
+              </div>
               <div className="space-y-2"><Label>Trial amount (₹)</Label><Input type="number" min="1" step="0.01" placeholder="1" value={form.trialAmount} onChange={(e) => setForm({ ...form, trialAmount: e.target.value })} /></div>
               <div className="space-y-2"><Label>Trial days</Label><Input type="number" min="1" placeholder="1" value={form.trialDays} onChange={(e) => setForm({ ...form, trialDays: e.target.value })} /></div>
             </>}

@@ -65,6 +65,10 @@ export async function listAdminResource(resource, params = {}) {
   return { data: response.data.data, meta: response.data.meta };
 }
 
+export async function createRazorpayPlan(fields) {
+  return dataOf(await adminApi.post('/admin/subscription-plans/razorpay-plan', fields));
+}
+
 export async function createAdminResource(resource, fields) {
   return dataOf(await adminApi.post(`/admin/${resource}`, fields));
 }
