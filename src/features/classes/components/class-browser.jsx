@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, BookOpen, GraduationCap } from 'lucide-react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/feedback/empty-state';
 import { ErrorState } from '@/components/feedback/error-state';
@@ -14,25 +14,33 @@ import { ROUTES } from '@/constants/routes';
 import { track } from '@/services/analytics/analytics';
 import { ANALYTICS_EVENTS } from '@/services/analytics/events';
 
+// Backend order isn't guaranteed to match the natural progression students
+// expect — pin the common tracks first, anything else keeps its incoming order after.
+const CLASS_ORDER = ['class 11', 'class 12', 'dropper'];
+
+function sortClasses(classes) {
+  return [...classes].sort((a, b) => {
+    const rankA = CLASS_ORDER.indexOf(a.name.trim().toLowerCase());
+    const rankB = CLASS_ORDER.indexOf(b.name.trim().toLowerCase());
+    return (rankA === -1 ? CLASS_ORDER.length : rankA) - (rankB === -1 ? CLASS_ORDER.length : rankB);
+  });
+}
+
 export function ClassBrowser({ subjectId, subjectName }) {
-  const [selectedClassId, setSelectedClassId] = useState(null);
-  const { data: classes = [], isLoading, isError, error, refetch } = useClassesQuery();
-  const selectedClass = useMemo(
-    () => classes.find((classItem) => classItem.id === selectedClassId),
-    [classes, selectedClassId],
-  );
+  const router = useRouter();
+  const { data: rawClasses = [], isLoading, isError, error, refetch } = useClassesQuery();
+  const classes = useMemo(() => sortClasses(rawClasses), [rawClasses]);
 
   function handleSelect(classItem) {
-    setSelectedClassId(classItem.id);
     track(ANALYTICS_EVENTS.CLASS_SELECTED, {
       classId: classItem.id,
       className: classItem.name,
       subjectId,
       subjectName,
     });
-    toast.success(`${classItem.name} selected`, {
-      description: `You’re ready to explore ${subjectName || 'this subject'} chapters.`,
-    });
+    router.push(
+      `/subjects/${subjectId}/classes/${classItem.id}/chapters?subject=${encodeURIComponent(subjectName)}&class=${encodeURIComponent(classItem.name)}`,
+    );
   }
 
   return (
@@ -80,20 +88,7 @@ export function ClassBrowser({ subjectId, subjectName }) {
       ) : classes.length === 0 ? (
         <EmptyState title="No classes available" description="Classes will appear here once they are available." />
       ) : (
-        <>
-          <ClassGrid classes={classes} selectedClassId={selectedClassId} onSelect={handleSelect} />
-          {selectedClass && (
-            <div className="sticky bottom-4 z-20 flex justify-end rounded-2xl border bg-background/90 p-3 shadow-lg backdrop-blur">
-              <Button size="lg" asChild>
-                <Link
-                  href={`/subjects/${subjectId}/classes/${selectedClass.id}/chapters?subject=${encodeURIComponent(subjectName)}&class=${encodeURIComponent(selectedClass.name)}`}
-                >
-                  Continue to chapters
-                </Link>
-              </Button>
-            </div>
-          )}
-        </>
+        <ClassGrid classes={classes} selectedClassId={null} onSelect={handleSelect} />
       )}
     </div>
   );

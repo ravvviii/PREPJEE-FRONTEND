@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { SectionHeader } from '@/components/dashboard/SectionHeader';
@@ -7,9 +8,18 @@ import { SubjectCard } from '@/components/dashboard/SubjectCard';
 import { subjectsOverview as defaultSubjectsOverview } from '@/components/dashboard/progress-data';
 import { usePaywall } from '@/features/paywall/providers/paywall-provider';
 import { FEATURES } from '@/features/paywall/config/entitlement-policy';
+import { useSubjectsQuery } from '@/features/subjects/hooks/use-subjects-query';
 
 export function SubjectsOverview({ data = defaultSubjectsOverview }) {
   const { triggerPaywall } = usePaywall();
+  const subjectsQuery = useSubjectsQuery();
+
+  // Dashboard progress is mocked by subject name (Physics/Chemistry/Mathematics),
+  // but the classes route needs the real backend subject ID — match them up here.
+  const subjectsByName = useMemo(() => {
+    const items = subjectsQuery.data?.pages.flatMap((page) => page.items) ?? [];
+    return new Map(items.map((subject) => [subject.name.toLowerCase(), subject]));
+  }, [subjectsQuery.data]);
 
   const handleClick = (event) => {
     if (!data.locked) return;
@@ -39,9 +49,15 @@ export function SubjectsOverview({ data = defaultSubjectsOverview }) {
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {data.subjects.map((subject, index) => (
-          <SubjectCard key={subject.id} index={index} {...subject} />
-        ))}
+        {data.subjects.map((subject, index) => {
+          const realSubject = subjectsByName.get(subject.name.toLowerCase());
+          const href =
+            !data.locked && realSubject
+              ? `/subjects/${realSubject.id}/classes?subject=${encodeURIComponent(realSubject.name)}`
+              : undefined;
+
+          return <SubjectCard key={subject.id} index={index} href={href} {...subject} />;
+        })}
       </div>
     </motion.section>
   );

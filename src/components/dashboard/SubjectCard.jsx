@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,12 +15,13 @@ export function SubjectCard({
   chaptersCovered,
   previewChapters,
   index = 0,
+  href,
 }) {
   const colors = SUBJECT_COLORS[color];
   const percentage =
     totalChapters > 0 ? Math.round((chaptersCovered / totalChapters) * 100) : 0;
 
-  return (
+  const card = (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
@@ -66,15 +68,22 @@ export function SubjectCard({
         <ChapterPreviewList chapters={previewChapters} />
       </div>
 
-      <a
-        href="#"
+      <span
         className={cn(
           'mt-4 flex items-center gap-1.5 text-sm font-medium',
           colors.link
         )}
       >
         All {totalChapters} chapters <ArrowRight className="h-4 w-4" />
-      </a>
+      </span>
     </motion.div>
+  );
+
+  if (!href) return card;
+
+  return (
+    <Link href={href} className="block" aria-label={`Open ${name}`}>
+      {card}
+    </Link>
   );
 }

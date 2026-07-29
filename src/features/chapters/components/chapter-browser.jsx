@@ -73,7 +73,7 @@ export function ChapterBrowser({ subjectId, classId, subjectName, className }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
       <Button variant="ghost" asChild className="-ml-2">
         <Link href={`/subjects/${subjectId}/classes?subject=${encodeURIComponent(subjectName)}`}>
           <ArrowLeft aria-hidden="true" />
@@ -81,15 +81,15 @@ export function ChapterBrowser({ subjectId, classId, subjectName, className }) {
         </Link>
       </Button>
 
-      <div className="rounded-2xl border bg-gradient-to-br from-primary/12 via-card to-card p-6 sm:p-8">
+      <div className="rounded-2xl border bg-gradient-to-br from-primary/12 via-card to-card  sm:p-8">
         <div className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground">
           <LibraryBig className="size-5" aria-hidden="true" />
         </div>
-        <p className="mt-4 text-sm font-medium text-primary">
+        <p className="mt-1 text-sm font-medium text-primary">
           {subjectName} · {className}
         </p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">NCERT chapters</h1>
-        <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+        <p className="mt-1 text-sm text-muted-foreground sm:text-base">
           Choose a chapter to review concepts and start practising questions.
         </p>
       </div>
