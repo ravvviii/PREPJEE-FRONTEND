@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -22,10 +22,12 @@ import {
 import { loadRazorpay } from '../lib/razorpay';
 import { PaywallPricePanel } from './paywall-price-panel';
 import { PaywallBenefits } from './paywall-benefits';
+import { PaywallSuccess } from './paywall-success';
 
 export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
   const { user, refreshUser } = useAuth();
   const [paymentState, setPaymentState] = useState('idle');
+  const [dialogVisible, setDialogVisible] = useState(true);
   const paymentStartingRef = useRef(false);
 
   const plansQuery = useQuery({
@@ -52,13 +54,20 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
 
   const close = () => {
     if (paymentState === 'creating_order' || paymentState === 'verifying') return;
+    if (paymentState === 'success') {
+      onPaymentSuccess();
+      return;
+    }
     track(ANALYTICS_EVENTS.PAYWALL_DISMISSED, properties);
     onClose();
   };
 
+  const paymentHandledRef = useRef(false);
+
   const startPayment = async () => {
     if (!selectedPlan || paymentStartingRef.current) return;
     paymentStartingRef.current = true;
+    paymentHandledRef.current = false;
     setPaymentState('creating_order');
     track(ANALYTICS_EVENTS.PAYMENT_STARTED, properties);
 
@@ -93,11 +102,19 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
         theme: { color: THEME_COLORS.external.primary },
         modal: {
           ondismiss: () => {
+            // Razorpay also fires ondismiss when it auto-closes the widget after
+            // a successful payment, right as `handler` is verifying — this guard
+            // stops that from stomping the in-flight/succeeded state back to idle.
+            // In that case `handler` itself is responsible for bringing our
+            // dialog back (once verification settles), not this callback.
+            if (paymentHandledRef.current) return;
             setPaymentState('idle');
+            setDialogVisible(true);
             track(ANALYTICS_EVENTS.PAYMENT_CANCELLED, properties);
           },
         },
         handler: async (response) => {
+          paymentHandledRef.current = true;
           setPaymentState('verifying');
           track(ANALYTICS_EVENTS.PAYMENT_VERIFICATION_STARTED, properties);
           try {
@@ -117,6 +134,7 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
             await refreshUser();
             clearCheckoutIdempotencyKey(selectedPlan.id);
             setPaymentState('success');
+            setDialogVisible(true);
             track(ANALYTICS_EVENTS.PAYMENT_SUCCEEDED, properties);
             track(ANALYTICS_EVENTS.SUBSCRIPTION_ACTIVATED, properties);
             toast.success(
@@ -124,9 +142,9 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
                 ? `Your ${selectedPlan.trialDays}-day Premium trial is active.`
                 : 'PrepJEE Premium is now active.',
             );
-            onPaymentSuccess();
           } catch (error) {
             setPaymentState('failed');
+            setDialogVisible(true);
             track(ANALYTICS_EVENTS.PAYMENT_FAILED, { ...properties, code: error.code });
             toast.error(error.message || 'Payment verification failed. Please retry.');
           }
@@ -136,6 +154,7 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
       checkout.on('payment.failed', (response) => {
         clearCheckoutIdempotencyKey(selectedPlan.id);
         setPaymentState('failed');
+        setDialogVisible(true);
         track(ANALYTICS_EVENTS.PAYMENT_FAILED, {
           ...properties,
           code: response.error?.code,
@@ -143,6 +162,7 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
         toast.error(response.error?.description || 'Payment failed. Please retry.');
       });
       setPaymentState('checkout_open');
+      setDialogVisible(false);
       track(ANALYTICS_EVENTS.RAZORPAY_OPENED, properties);
       checkout.open();
     } catch (error) {
@@ -153,6 +173,7 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
         clearCheckoutIdempotencyKey(selectedPlan.id);
       }
       setPaymentState('failed');
+      setDialogVisible(true);
       track(ANALYTICS_EVENTS.PAYMENT_FAILED, { ...properties, code: error.code });
       toast.error(error.message || 'Could not start payment. Please retry.');
     } finally {
@@ -177,7 +198,7 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
             : 'Unlock everything';
 
   return (
-    <Dialog open={Boolean(request)} onOpenChange={(open) => !open && close()}>
+    <Dialog open={Boolean(request) && dialogVisible} onOpenChange={(open) => !open && close()}>
       <DialogContent
         showCloseButton={false}
         className="max-h-[92vh] max-w-[calc(100%-2rem)] overflow-y-auto rounded-3xl border-none bg-[#FBF6E8] p-0 sm:max-w-4xl"
@@ -212,10 +233,12 @@ export function PaywallDialog({ request, onClose, onPaymentSuccess }) {
               No subscription plans are available right now.
             </p>
           ) : paymentState === 'success' ? (
-            <div className="mt-10 flex flex-col items-center gap-3 py-16 text-center text-emerald-700">
-              <CheckCircle2 className="size-10" aria-hidden="true" />
-              <p className="text-xl font-semibold">Payment successful. Premium is active.</p>
-            </div>
+            <PaywallSuccess
+              userName={user?.name?.split(' ')[0]}
+              plan={selectedPlan}
+              expiresAt={user?.subscription?.expiresAt}
+              onContinue={() => onPaymentSuccess()}
+            />
           ) : (
             <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-2">
               <PaywallPricePanel

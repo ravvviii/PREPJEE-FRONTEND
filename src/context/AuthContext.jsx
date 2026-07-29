@@ -2,12 +2,14 @@
 
 import { createContext, useContext, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/providers/auth-store';
 import * as authApi from '@/services/api/auth.api';
 import * as userApi from '@/services/api/user.api';
 import { getStoredItem, setStoredItem, removeStoredItem } from '@/utils/storage';
 import { STORAGE_KEYS } from '@/constants/storage-keys';
 import { ROUTES } from '@/constants/routes';
+import { QUERY_KEYS } from '@/constants/query-keys';
 import { track, identify, reset as resetAnalytics } from '@/services/analytics/analytics';
 import { ANALYTICS_EVENTS } from '@/services/analytics/events';
 
@@ -19,15 +21,29 @@ const AuthContext = createContext(null);
 // session-restore-on-mount effect and the login/logout/update actions.
 export function AuthProvider({ children }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const restoreAttempted = useRef(false);
 
   const accessToken = useAuthStore((s) => s.accessToken);
   const user = useAuthStore((s) => s.user);
   const status = useAuthStore((s) => s.status);
   const setSession = useAuthStore((s) => s.setSession);
-  const setUser = useAuthStore((s) => s.setUser);
+  const setUserInStore = useAuthStore((s) => s.setUser);
   const setStatus = useAuthStore((s) => s.setStatus);
   const clearSession = useAuthStore((s) => s.clearSession);
+
+  // The Zustand store and the ['users','me'] query cache both hold a copy of
+  // the profile (useMeQuery seeds itself from the store but doesn't refetch
+  // just because the store changes) — every profile write must go through
+  // here so the two never drift, e.g. a payment updating subscription status
+  // in the store while `useIsPremium`'s query cache still shows the old one.
+  const setUser = useCallback(
+    (profile) => {
+      setUserInStore(profile);
+      queryClient.setQueryData(QUERY_KEYS.ME, profile);
+    },
+    [setUserInStore, queryClient],
+  );
 
   const identifyUser = useCallback((profile) => {
     identify(profile.id, { subscriptionStatus: profile.subscription?.status ?? 'none' });

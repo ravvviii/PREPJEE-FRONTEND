@@ -9,4 +9,10 @@ export const PAYWALL_OFFER = {
     'Every past paper since 2015',
   ],
   refundNote: 'Not satisfied? Get a full refund within an hour.',
+  unlockedFeatures: [
+    { title: 'All 90 chapters', subtitle: '12,400 QUESTIONS' },
+    { title: 'All 24 mock papers', subtitle: 'WITH REAL PERCENTILE' },
+    { title: '148 practice sets', subtitle: '20-30 MIN EACH' },
+    { title: 'Mistake notebook', subtitle: 'FULL ANALYTICS' },
+  ],
 };
