@@ -11,6 +11,7 @@ import { StatsSummary } from '@/features/home/components/stats-summary';
 import { ModulesGrid } from '@/features/home/components/modules-grid';
 import { useMeQuery } from '@/features/home/hooks/use-me-query';
 import { useIsPremium } from '@/features/paywall/hooks/use-is-premium';
+import { useTrapBackNavigation } from '@/hooks/use-trap-back-navigation';
 import { progress as defaultProgress, subjectsOverview as defaultSubjectsOverview } from '@/components/dashboard/progress-data';
 import { track } from '@/services/analytics/analytics';
 import { ANALYTICS_EVENTS } from '@/services/analytics/events';
@@ -37,6 +38,8 @@ export default function HomePage() {
   const { data: user, isLoading, isError, refetch, isSuccess } = useMeQuery();
   const { isPremium } = useIsPremium();
   const profileFetchedTracked = useRef(false);
+
+  useTrapBackNavigation();
 
   const progress = {
     ...defaultProgress,
