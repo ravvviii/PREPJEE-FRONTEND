@@ -2,18 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-
-const DOT_COLORS = {
-  blue: 'bg-blue-500',
-  green: 'bg-emerald-500',
-  orange: 'bg-orange-500',
-};
-
-const BAR_COLORS = {
-  blue: 'bg-blue-500',
-  green: 'bg-emerald-500',
-  orange: 'bg-orange-500',
-};
+import { SUBJECT_COLORS } from '@/components/dashboard/subject-colors';
 
 export function SubjectProgress({ subject, color, completed, total }) {
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
@@ -21,7 +10,7 @@ export function SubjectProgress({ subject, color, completed, total }) {
   return (
     <div className="flex items-center gap-4">
       <div className="flex w-28 shrink-0 items-center gap-2">
-        <span className={cn('h-2 w-2 rounded-full', DOT_COLORS[color])} />
+        <span className={cn('h-2 w-2 rounded-full', SUBJECT_COLORS[color].dot)} />
         <span className="text-sm font-medium">{subject}</span>
       </div>
 
@@ -30,7 +19,7 @@ export function SubjectProgress({ subject, color, completed, total }) {
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className={cn('h-full rounded-full', BAR_COLORS[color])}
+          className={cn('h-full rounded-full', SUBJECT_COLORS[color].bar)}
         />
       </div>
 

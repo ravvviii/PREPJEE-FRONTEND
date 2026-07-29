@@ -15,7 +15,12 @@ export function ProgressOverview({ progress = defaultProgress }) {
       transition={{ duration: 0.5 }}
       className="flex flex-col gap-6"
     >
-      <SectionHeader locked={progress.locked} />
+      <SectionHeader
+        label="OVERALL PROGRESS"
+        heading="Where you stand"
+        actionLabel="Full analytics"
+        locked={progress.locked}
+      />
 
       <MetricsGrid progress={progress} />
 
