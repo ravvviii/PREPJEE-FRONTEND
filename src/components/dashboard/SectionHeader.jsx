@@ -3,6 +3,7 @@
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StudentPassBadge } from '@/components/dashboard/StudentPassBadge';
+import { useRouter } from 'next/navigation';
 
 export function SectionHeader({
   label = 'OVERALL PROGRESS',
@@ -10,6 +11,7 @@ export function SectionHeader({
   actionLabel = 'Full analytics',
   locked,
 }) {
+  const router = useRouter();
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
@@ -23,7 +25,7 @@ export function SectionHeader({
         </div>
       </div>
 
-      <Button variant="ghost" className="self-start sm:self-auto">
+      <Button variant="ghost" className="self-start sm:self-auto" onClick={()=>router.push('/progress')}>
         {actionLabel} <ArrowRight className="h-4 w-4" />
       </Button>
     </div>
