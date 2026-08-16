@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
 import { env } from '@/config/env';
 
@@ -11,6 +11,22 @@ import { env } from '@/config/env';
 export function GoogleSignInButton({ onCredential, disabled }) {
   const buttonRef = useRef(null);
   const initialized = useRef(false);
+  const [nativeGoogleAuth, setNativeGoogleAuth] = useState(null);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const capacitor = window.Capacitor;
+      if (capacitor?.getPlatform?.() === 'android' && capacitor.Plugins?.NativeGoogleAuth) {
+        setNativeGoogleAuth(capacitor.Plugins.NativeGoogleAuth);
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  const handleNativeSignIn = async () => {
+    const { idToken } = await nativeGoogleAuth.signIn();
+    await onCredential(idToken);
+  };
 
   const renderButton = useCallback(() => {
     if (initialized.current || typeof window === 'undefined' || !window.google || !buttonRef.current) {
@@ -30,6 +46,20 @@ export function GoogleSignInButton({ onCredential, disabled }) {
       text: 'continue_with',
     });
   }, [onCredential]);
+
+  if (nativeGoogleAuth) {
+    return (
+      <button
+        type="button"
+        onClick={handleNativeSignIn}
+        disabled={disabled}
+        className="flex h-10 w-80 items-center justify-center gap-3 rounded border bg-white px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50"
+      >
+        <span className="text-lg font-semibold text-blue-600">G</span>
+        Continue with Google
+      </button>
+    );
+  }
 
   if (!env.googleClientId) {
     return (
