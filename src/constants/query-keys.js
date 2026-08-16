@@ -9,4 +9,6 @@ export const QUERY_KEYS = {
   BOOKMARKS: ['bookmarks'],
   QUESTION_ACCURACY: ['questions', 'accuracy'],
   PROGRESS: ['progress'],
+  EXAMS: ['exams'],
+  QUESTION_SETS: ['question-sets'],
 };

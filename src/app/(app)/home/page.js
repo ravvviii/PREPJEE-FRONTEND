@@ -10,6 +10,7 @@ import { UpgradeBanner } from '@/components/dashboard/UpgradeBanner';
 import { StatsSummary } from '@/features/home/components/stats-summary';
 import { ModulesGrid } from '@/features/home/components/modules-grid';
 import { useMeQuery } from '@/features/home/hooks/use-me-query';
+import { useProgressQuery } from '@/features/progress/hooks/use-progress-query';
 import { useIsPremium } from '@/features/paywall/hooks/use-is-premium';
 import { useTrapBackNavigation } from '@/hooks/use-trap-back-navigation';
 import { progress as defaultProgress, subjectsOverview as defaultSubjectsOverview } from '@/components/dashboard/progress-data';
@@ -36,6 +37,7 @@ function HomeSkeleton() {
 
 export default function HomePage() {
   const { data: user, isLoading, isError, refetch, isSuccess } = useMeQuery();
+  const { data: progressData } = useProgressQuery();
   const { isPremium } = useIsPremium();
   const profileFetchedTracked = useRef(false);
 
@@ -45,6 +47,8 @@ export default function HomePage() {
     ...defaultProgress,
     questionsSolved: user?.stats?.totalAttempts ?? defaultProgress.questionsSolved,
     accuracy: user?.stats?.accuracyPercent ?? defaultProgress.accuracy,
+    mocksAttempted: progressData?.mocksAttempted ?? defaultProgress.mocksAttempted,
+    totalMocks: progressData?.totalMocks ?? defaultProgress.totalMocks,
     locked: !isPremium,
   };
 
