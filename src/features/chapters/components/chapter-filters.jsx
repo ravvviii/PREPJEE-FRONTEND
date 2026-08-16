@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export function ChapterFilters({ search, onSearchChange, difficulty, onDifficultyChange, sort, onSortChange }) {
   return (
-    <div className="sticky top-20 z-20 rounded-2xl border bg-background/90 p-3 shadow-sm backdrop-blur">
+    <div className="sticky top-20 z-20 rounded-2xl border bg-background p-3 shadow-sm">
       <div className="flex flex-col gap-3 lg:flex-row">
         <div className="relative min-w-0 flex-1">
           <Search

@@ -19,7 +19,7 @@ export function DashboardHero({ user }) {
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex flex-col gap-8 py-12 lg:flex-row lg:items-end lg:justify-between"
+      className="flex flex-col gap-8 py-4 mt-4 lg:flex-row lg:items-end lg:justify-between"
     >
       <div className="max-w-3xl">
         <h1 className="text-4xl font-bold leading-tight">

@@ -22,6 +22,7 @@ import { ErrorState } from '@/components/feedback/error-state';
 import { useChapterOverviewQuery } from '../hooks/use-chapter-overview-query';
 import { getChapterDescription } from '../utils/chapter-description';
 import { getChapterDifficulty } from '../utils/chapter';
+import { SetList } from '@/features/question-sets/components/set-list';
 import { track } from '@/services/analytics/analytics';
 import { ANALYTICS_EVENTS } from '@/services/analytics/events';
 
@@ -136,6 +137,15 @@ export function ChapterOverview({ chapterId, subjectId, classId, subjectName, cl
         />
         <StatCard icon={Bookmark} label="Bookmarks" value={bookmarkCount} detail="Saved from this chapter" />
       </section>
+
+      <SetList
+        subjectId={subjectId}
+        classId={classId}
+        chapterId={chapterId}
+        subjectName={subjectName}
+        className={className}
+        chapterName={chapter.name}
+      />
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border bg-card p-6">

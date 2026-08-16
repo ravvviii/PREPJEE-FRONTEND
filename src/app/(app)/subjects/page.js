@@ -10,6 +10,8 @@ import { SubjectHeader } from '@/features/subjects/components/subject-header';
 import { SubjectSearch } from '@/features/subjects/components/subject-search';
 import { SubjectSkeleton } from '@/features/subjects/components/subject-skeleton';
 import { useSubjectsQuery } from '@/features/subjects/hooks/use-subjects-query';
+import { useClassesQuery } from '@/features/classes/hooks/use-classes-query';
+import { excludeDropper, sortClasses } from '@/features/classes/utils/class-order';
 import { useDebounce } from '@/hooks/use-debounce';
 import { track } from '@/services/analytics/analytics';
 import { ANALYTICS_EVENTS } from '@/services/analytics/events';
@@ -29,6 +31,8 @@ export default function SubjectsPage() {
     fetchNextPage,
     isFetchingNextPage,
   } = useSubjectsQuery();
+  const { data: rawClasses = [], isLoading: classesLoading } = useClassesQuery();
+  const classes = useMemo(() => sortClasses(excludeDropper(rawClasses)), [rawClasses]);
 
   const subjects = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
   const visibleSubjects = useMemo(() => {
@@ -56,14 +60,16 @@ export default function SubjectsPage() {
     });
   }, [debouncedSearch, visibleSubjects.length]);
 
-  function handleSelect(subject) {
+  function handleSelect(subject, classItem) {
     track(ANALYTICS_EVENTS.SUBJECT_SELECTED, {
       subjectId: subject.id,
       subjectName: subject.name,
+      classId: classItem.id,
+      className: classItem.name,
     });
   }
 
-  if (isLoading) {
+  if (isLoading || classesLoading) {
     return (
       <div className="space-y-6">
         <div className="h-56 animate-pulse rounded-2xl bg-muted" />
@@ -84,11 +90,11 @@ export default function SubjectsPage() {
 
   return (
     <div className="space-y-6">
-      <SubjectHeader
+      {/* <SubjectHeader
         loadedCount={subjects.length}
         visibleCount={visibleSubjects.length}
         isSearching={Boolean(debouncedSearch)}
-      />
+      /> */}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -113,7 +119,7 @@ export default function SubjectsPage() {
         />
       ) : (
         <>
-          <SubjectGrid subjects={visibleSubjects} onSelect={handleSelect} />
+          <SubjectGrid subjects={visibleSubjects} classes={classes} onSelect={handleSelect} />
           {hasNextPage && !debouncedSearch && (
             <div className="flex justify-center pt-2">
               <Button variant="outline" onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
