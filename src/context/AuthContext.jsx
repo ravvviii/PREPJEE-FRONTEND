@@ -83,6 +83,36 @@ export function AuthProvider({ children }) {
     [applySession],
   );
 
+  const registerWithEmail = useCallback(
+    async ({ email, password, name }) => {
+      try {
+        const result = await authApi.registerWithEmail({ email, password, name });
+        const profile = await applySession(result);
+        track(ANALYTICS_EVENTS.LOGIN_SUCCESS, { method: 'email_register' });
+        return profile;
+      } catch (error) {
+        track(ANALYTICS_EVENTS.LOGIN_FAILED, { method: 'email_register', code: error.code });
+        throw error;
+      }
+    },
+    [applySession],
+  );
+
+  const loginWithEmail = useCallback(
+    async (email, password) => {
+      try {
+        const result = await authApi.loginWithEmail(email, password);
+        const profile = await applySession(result);
+        track(ANALYTICS_EVENTS.LOGIN_SUCCESS, { method: 'email' });
+        return profile;
+      } catch (error) {
+        track(ANALYTICS_EVENTS.LOGIN_FAILED, { method: 'email', code: error.code });
+        throw error;
+      }
+    },
+    [applySession],
+  );
+
   const sendOtp = useCallback(async (phone) => {
     try {
       const result = await authApi.sendOtp(phone);
@@ -185,6 +215,8 @@ export function AuthProvider({ children }) {
     isAuthenticated: status === 'authenticated',
     isLoading: status === 'idle' || status === 'authenticating',
     loginWithGoogle,
+    registerWithEmail,
+    loginWithEmail,
     sendOtp,
     verifyOtp,
     logout,

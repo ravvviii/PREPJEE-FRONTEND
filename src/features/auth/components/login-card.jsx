@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { GoogleSignInButton } from './google-sign-in-button';
 import { PhoneOtpForm } from './phone-otp-form';
+import { EmailPasswordForm } from './email-password-form';
 
 export function LoginCard() {
   const { loginWithGoogle } = useAuth();
@@ -35,11 +37,22 @@ export function LoginCard() {
 
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-border" />
-        <span className="text-xs uppercase tracking-wide text-muted-foreground">or continue with phone</span>
+        <span className="text-xs uppercase tracking-wide text-muted-foreground">or continue with</span>
         <div className="h-px flex-1 bg-border" />
       </div>
 
-      <PhoneOtpForm />
+      <Tabs defaultValue="email" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="email">Email</TabsTrigger>
+          <TabsTrigger value="phone">Phone</TabsTrigger>
+        </TabsList>
+        <TabsContent value="email" className="mt-4">
+          <EmailPasswordForm />
+        </TabsContent>
+        <TabsContent value="phone" className="mt-4">
+          <PhoneOtpForm />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
